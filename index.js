@@ -9,9 +9,14 @@ const ixtAddress = "0x..."; // IXT token address on Polygon
 
 // QuickSwap Router Contract ABI (simplified, get the full ABI from the docs or Polygonscan)
 const quickSwapRouterABI = [
-  // Add the full ABI here
+  // Method to scan for
   "function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)",
-  // Include other relevant methods
+
+  // Method to swap ETH (or MATIC on Polygon) for tokens
+  "function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)",
+
+  // Method to swap tokens for ETH (or MATIC on Polygon)
+  "function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)",
 ];
 const provider = new ethers.providers.JsonRpcProvider(
   process.env.POLYGON_RPC_URL
@@ -87,6 +92,7 @@ async function buyIXTWithMATIC(originalTx) {
   }
 }
 
+// Function to Sell All IXT for MATIC
 async function sellAllIXTForMATIC() {
   const ixtTokenABI = [
     // Minimal ABI for balanceOf and approve
@@ -129,6 +135,7 @@ async function sellAllIXTForMATIC() {
   }
 }
 
+// Function to Handle the Transaction Sequence
 async function handleTransactionSequence(originalTx) {
   try {
     // Assuming buyIXTWithMATIC returns the transaction object
@@ -162,7 +169,7 @@ provider.on("block", async (blockNumber) => {
       // Decode the transaction to see if it matches the criteria
       const isTargetedTransaction = await decodeTransaction(tx.hash);
 
-      // If it matches, execute a buy order for IXT
+      // If it matches, execute a the tx sequence
       if (isTargetedTransaction) {
         console.log("Matching transaction found, attempting to buy IXT...");
         await handleTransactionSequence(tx);
